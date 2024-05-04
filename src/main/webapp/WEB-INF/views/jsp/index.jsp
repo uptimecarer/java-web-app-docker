@@ -48,7 +48,7 @@
 
 	<hr>
 	<footer>
-		<p>&copy; Mithun Technologies 2023</p>
+		<p>&copy; Hello</p>
 	</footer>
 </div>
 
