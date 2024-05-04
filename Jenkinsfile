@@ -23,7 +23,7 @@ stage('Run Docker Image In Dev Server'){
         def dockerRun = ' docker run  -d -p 8080:8080 --name java-web-app uptimecareer/java-webapp-docker'
          
          sshagent(['docker_host']) {
-          sh 'ssh -o StrictHostKeyChecking=no ec2-user@172.31.27.59 docker stop java-webapp-docker || true'
+          sh 'ssh -o StrictHostKeyChecking=no ec2-user@172.31.27.59 docker stop java-web-app || true'
           sh 'ssh  ec2-user@172.31.27.59 docker rm -f java-web-app || true'
           sh 'ssh  ec2-user@172.31.27.59 docker rmi -f  $(docker images -q) || true'
           sh "ssh  ec2-user@172.31.27.59 ${dockerRun}"
