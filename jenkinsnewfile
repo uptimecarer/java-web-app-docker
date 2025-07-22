@@ -1,0 +1,29 @@
+node{
+   def  mavenHome = tool name : 'maven-3.9.6'
+   def mavenCMD = "${mavenHome}/bin/mvn"
+    stage('CheckouCode'){
+        git credentialsId: '57f574be-f39d-4f9e-baa1-49e54c02fb99', 
+        url: 'https://github.com/uptimecarer/java-web-app-docker.git'
+    }
+    stage('BuildArtifact'){
+        sh "${mavenCMD} clean package"
+    }
+    stage('BuildDockerImage'){
+        sh "docker build -t uptimecareeer/java-webapp-docker ."
+    }
+    stage('ArtifactIntoDockerandPushImage'){
+        withCredentials([string(credentialsId: 'Doc_Hub_Pw', variable: 'Doc_Hub_Pw')]) {
+    sh "docker login -u uptimecareeer -p ${Doc_Hub_Pw} "
+       }
+       sh "docker push uptimecareeer/java-webapp-docker"
+    }
+    stage('RunDockerImageIntoDeploymentServer'){
+        def dockerRun = "docker run -d -p 8086:8080 --name java-web-app uptimecareeer/java-webapp-docker"
+        sshagent(['docker_hostt']){
+            sh 'ssh -o StrictHostKeyChecking=no ec2-user@172.31.1.236 docker stop java-web-app || true'
+            sh 'ssh ec2-user@172.31.1.236 docker rm java-web-app || true'
+            sh 'ssh ec2-user@172.31.1.236 docker rmi -f  $(docker images -q) || true'
+            sh "ssh ec2-user@172.31.1.236 ${dockerRun}"
+     }
+    }
+}
